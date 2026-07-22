@@ -42,6 +42,10 @@ $select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC'
 $select_sth->execute();
 ?>
 
+<head>
+ <title>画像投稿できる掲示板</title>
+</head>
+
 <!-- フォームのPOST先はこのファイル自身にする -->
 <form method="POST" action="./bbsimagetest.php" enctype="multipart/form-data">
   <textarea name="body" required></textarea>
@@ -69,3 +73,21 @@ $select_sth->execute();
       <?php endif; ?>
     </dd>
   </dl>
+
+
+<?php endforeach ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const imageInput = document.getElementById("imageInput");
+  imageInput.addEventListener("change", () => {
+    if (imageInput.files.length < 1) {
+      // 未選択の場合
+      return;
+    }
+    if (imageInput.files[0].size > 5 * 1024 * 1024) {
+      // ファイルが5MBより多い場合
+      alert("5MB以下のファイルを選択してください。");
+      imageInput.value = "";
+    }
+  });
