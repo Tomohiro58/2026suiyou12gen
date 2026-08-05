@@ -2,10 +2,84 @@
 
 ## 1. EC2インスタンスへ接続
 ```bash
-ssh ec2-user@<EC2のIPアドレス>
+ssh ec2-user@<EC2のIPアドレス> -i 秘密鍵ファイルのパス
 ```
 
 ---
+
+## 2. パッケージのインストールと設定
+
+### Gitをインストール
+
+```bash
+sudo yum install -y git
+```
+
+### Dockerをインストールして起動
+
+```bash
+sudo yum install -y docker
+sudo systemctl start docker
+```
+
+### ec2-userにDockerの実行権限を付与
+
+```bash
+sudo usermod -aG docker ec2-user
+```
+
+権限を反映させるため、一度ログアウトします。
+
+```bash
+exit
+```
+
+再度EC2へログインしてください。
+
+---
+
+### Docker Composeをインストール
+
+```bash
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+
+mkdir -p $DOCKER_CONFIG/cli-plugins
+
+curl -SL https://github.com/docker/compose/releases/download/v2.5.1/docker-compose-linux-x86_64 \
+-o $DOCKER_CONFIG/cli-plugins/docker-compose
+
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+```
+
+### Docker Composeのインストール確認
+
+```bash
+docker compose version
+```
+
+---
+
+### Docker Buildxをインストール
+
+```bash
+mkdir -p ~/.docker/cli-plugins/
+
+curl -SL https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
+-o ~/.docker/cli-plugins/docker-buildx
+
+chmod +x ~/.docker/cli-plugins/docker-buildx
+```
+
+---
+
+### screenをインストール
+
+```bash
+sudo yum install -y screen
+```
+
+---
+
 
 ## 2・リポジトリをクローン
 ```bash
@@ -20,21 +94,24 @@ cd 2026suiyou12gen
 ---
 
 ## 3・dockerコンテナを起動・起動
+
+### screenを起動します
+```bash
+screen
+```
+
+### コンテナを起動します
 ```bash
 docker compose up -d --build
 ```
 
-起動していることを確認します。
 
-```bash
-docker compose ps
-```
 ---
 
 ## 4. MySQLコンテナへ入る
 
 ```bash
-docker compose exec mysql mysql -u root
+docker compose exec mysql mysql example_db
 ```
 
 
@@ -45,8 +122,9 @@ docker compose exec mysql mysql -u root
 CREATE TABLE `bbs_entries` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `body` TEXT NOT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `image_filename` TEXT DEFAULT NULL
+);
 ```
 
 作成できたことを確認します。
